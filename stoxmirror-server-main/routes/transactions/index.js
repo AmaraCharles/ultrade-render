@@ -1,4 +1,3 @@
-
 var express = require("express");
 // const { v4: uuidv4 } = require("uuid");
 const UsersDatabase = require("../../models/User");
@@ -1917,6 +1916,94 @@ router.get("/:_id/withdrawals/history", async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+  }
+});
+
+// =====================================================
+// 💰 PROFIT ADJUST — Admin adds or deducts profit
+// POST /transactions/:_id/profit/adjust
+// Body: { type: "add"|"deduct", amount: Number, note: String }
+// =====================================================
+router.post("/:_id/profit/adjust", async (req, res) => {
+  const { _id } = req.params;
+  const { type, amount, note } = req.body;
+
+  if (!["add", "deduct"].includes(type)) {
+    return res.status(400).json({ success: false, message: "type must be 'add' or 'deduct'" });
+  }
+
+  const adjustAmount = Number(amount);
+  if (isNaN(adjustAmount) || adjustAmount <= 0) {
+    return res.status(400).json({ success: false, message: "amount must be a positive number" });
+  }
+
+  try {
+    const user = await UsersDatabase.findById(_id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const before = Number(user.profit || 0);
+    const after = type === "add"
+      ? before + adjustAmount
+      : Math.max(0, before - adjustAmount);
+
+    // Build the log entry
+    const logEntry = {
+      _id: uuidv4(),
+      type,           // "add" | "deduct"
+      amount: adjustAmount,
+      note: note || "",
+      before,
+      after,
+      date: new Date().toISOString(),
+    };
+
+    // Update profit and push to profitHistory array
+    await UsersDatabase.updateOne(
+      { _id },
+      {
+        $set: { profit: after },
+        $push: { profitHistory: logEntry },
+      }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: `Profit ${type === "add" ? "added" : "deducted"} successfully`,
+      before,
+      after,
+      entry: logEntry,
+    });
+  } catch (error) {
+    console.error("Error adjusting profit:", error);
+    return res.status(500).json({ success: false, message: "Internal server error", error: error.message });
+  }
+});
+
+// =====================================================
+// 📋 PROFIT HISTORY — User fetches their own log
+// GET /transactions/:_id/profit/history
+// =====================================================
+router.get("/:_id/profit/history", async (req, res) => {
+  const { _id } = req.params;
+
+  try {
+    const user = await UsersDatabase.findById(_id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const history = (user.profitHistory || []).slice().reverse(); // newest first
+
+    return res.status(200).json({
+      success: true,
+      data: history,
+      currentProfit: user.profit || 0,
+    });
+  } catch (error) {
+    console.error("Error fetching profit history:", error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 

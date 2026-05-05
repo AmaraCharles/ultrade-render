@@ -117,6 +117,10 @@ surveyCompleted: { type: Boolean, default: false },
   copyTradingActive: {
     type: Array,
   },
+  profitHistory: {
+    type: Array,
+    default: [],
+  },
   verified: {
     type: Boolean,
   },
