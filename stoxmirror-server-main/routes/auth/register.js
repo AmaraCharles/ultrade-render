@@ -520,4 +520,59 @@ router.post("/register/otp", async (req, res) => {
 //     });
 //   }
 // });
+// ─── POST-OTP SURVEY ───────────────────────────────────────────────
+router.put("/register/survey/:id", async (req, res) => {
+  const { id } = req.params;
+  const {
+    // Contact & Address
+    houseNo, streetAddress, city, province, zipCode, surveyCountry,
+    // Trading Experience
+    yearsOfExperience, tradingFrequency, instrumentsTraded,
+    knowledgeLevel, preferredMarkets, tradingPlatforms,
+    // Annual Earnings
+    annualIncome, primaryIncomeSource, taxResidency,
+  } = req.body;
+
+  try {
+    const user = await UsersDatabase.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // Contact & Address
+    user.survey_houseNo = houseNo || user.survey_houseNo;
+    user.survey_streetAddress = streetAddress || user.survey_streetAddress;
+    user.survey_city = city || user.survey_city;
+    user.survey_province = province || user.survey_province;
+    user.survey_zipCode = zipCode || user.survey_zipCode;
+    user.survey_country = surveyCountry || user.survey_country;
+
+    // Trading Experience
+    user.survey_yearsOfExperience = yearsOfExperience || user.survey_yearsOfExperience;
+    user.survey_tradingFrequency = tradingFrequency || user.survey_tradingFrequency;
+    user.survey_instrumentsTraded = instrumentsTraded || user.survey_instrumentsTraded;
+    user.survey_knowledgeLevel = knowledgeLevel || user.survey_knowledgeLevel;
+    user.survey_preferredMarkets = preferredMarkets || user.survey_preferredMarkets;
+    user.survey_tradingPlatforms = tradingPlatforms || user.survey_tradingPlatforms;
+
+    // Annual Earnings
+    user.survey_annualIncome = annualIncome || user.survey_annualIncome;
+    user.survey_primaryIncomeSource = primaryIncomeSource || user.survey_primaryIncomeSource;
+    user.survey_taxResidency = taxResidency || user.survey_taxResidency;
+
+    user.surveyCompleted = true;
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Survey saved successfully",
+      data: user,
+    });
+  } catch (error) {
+    console.error("Survey Error:", error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
 module.exports = router;

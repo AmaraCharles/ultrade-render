@@ -14,6 +14,29 @@ kycApprovedAt: { type: Date },
 kycRejectedAt: { type: Date },
 kycRejectionReason: { type: String },
 
+// KYC Survey — Contact & Address
+survey_houseNo: { type: String },
+survey_streetAddress: { type: String },
+survey_city: { type: String },
+survey_province: { type: String },
+survey_zipCode: { type: String },
+survey_country: { type: String },
+
+// KYC Survey — Trading Experience
+survey_yearsOfExperience: { type: String },
+survey_tradingFrequency: { type: String },
+survey_instrumentsTraded: { type: String },
+survey_knowledgeLevel: { type: String },
+survey_preferredMarkets: { type: String },
+survey_tradingPlatforms: { type: String },
+
+// KYC Survey — Annual Earnings
+survey_annualIncome: { type: String },
+survey_primaryIncomeSource: { type: String },
+survey_taxResidency: { type: String },
+
+surveyCompleted: { type: Boolean, default: false },
+
   copytrading: {
     type: String,
     
