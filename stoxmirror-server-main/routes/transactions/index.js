@@ -1779,15 +1779,29 @@ router.put("/:_id/withdrawals/:transactionId/confirm", async (req, res) => {
 );
 
 if (!withdrawalTx) {
-  return res.status(404).json({ message: "Not found" });
+  return res.status(404).json({
+    success: false,
+    status: 404,
+    message: "Withdrawal transaction not found",
+  });
 }
 
-withdrawalTx.set({ status: "Approved" });
+// Prevent double approval
+if (withdrawalTx.status === "Approved") {
+  return res.status(400).json({
+    success: false,
+    message: "Withdrawal already approved",
+  });
+}
 
+// Update transaction status
+withdrawalTx.status = "Approved";
+
+// Subtract amount safely
 const amount = Number(withdrawalTx.amount) || 0;
-
 user.profit = Math.max((user.profit || 0) - amount, 0);
 
+// IMPORTANT: tell mongoose array changed
 user.markModified("withdrawals");
 
 await user.save();
