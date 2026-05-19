@@ -108,9 +108,25 @@ surveyCompleted: { type: Boolean, default: false },
   accounts: {
     type: Object,
   },
-  withdrawals: {
-    type: Array,
+ withdrawals: [
+  {
+    amount: {
+      type: Number,
+      required: true,
+    },
+    method: {
+      type: String,
+    },
+    status: {
+      type: String,
+      default: "Pending",
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
   },
+],
    rewards: {
     type: Array,
   },
