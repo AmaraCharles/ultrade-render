@@ -1775,7 +1775,7 @@ router.put("/:_id/withdrawals/:transactionId/confirm", async (req, res) => {
 
     // 🔹 Find withdrawal transaction
     const withdrawalTx = user.withdrawals.find(
-      (tx) => tx._id.toString() === transactionId
+      (tx) => tx._id === transactionId
     );
 
     if (!withdrawalTx) {
