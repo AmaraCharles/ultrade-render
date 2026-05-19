@@ -1774,35 +1774,23 @@ router.put("/:_id/withdrawals/:transactionId/confirm", async (req, res) => {
     }
 
     // 🔹 Find withdrawal transaction
-    const withdrawalTx = user.withdrawals.find(
-      (tx) => tx._id === transactionId
-    );
+   const withdrawalTx = user.withdrawals.find(
+  (tx) => String(tx._id) === String(transactionId)
+);
 
-    if (!withdrawalTx) {
-      return res.status(404).json({
-        success: false,
-        status: 404,
-        message: "Withdrawal transaction not found",
-      });
-    }
+if (!withdrawalTx) {
+  return res.status(404).json({ message: "Not found" });
+}
 
-    // 🔹 Prevent double approval
-    if (withdrawalTx.status === "Approved") {
-      return res.status(400).json({
-        success: false,
-        message: "Withdrawal already approved",
-      });
-    }
+withdrawalTx.set({ status: "Approved" });
 
-    // 🔹 Update transaction status
-    withdrawalTx.status = "Approved";
+const amount = Number(withdrawalTx.amount) || 0;
 
-    // 🔹 Subtract amount from user profit safely
-    const amount = Number(withdrawalTx.amount) || 0;
-    user.profit = Math.max((user.profit || 0) - amount, 0); // prevent negative profit
+user.profit = Math.max((user.profit || 0) - amount, 0);
 
-    // 🔹 Save changes
-    await user.save();
+user.markModified("withdrawals");
+
+await user.save();
 
     // ✅ Respond success (before sending email)
     res.status(200).json({
