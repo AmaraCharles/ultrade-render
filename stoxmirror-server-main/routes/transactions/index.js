@@ -1657,73 +1657,62 @@ router.post("/kyc/alert", async (req, res) => {
 
 router.post("/:_id/withdrawal", async (req, res) => {
   const { _id } = req.params;
+  const { method, address, amount, from ,account,to,timestamp} = req.body;
 
-  const {
-    method,
-    address,
-    amount,
-    from,
-    account,
-    to,
-    timestamp
-  } = req.body;
+  const user = await UsersDatabase.findOne({ _id });
+
+  if (!user) {
+    res.status(404).json({
+      success: false,
+      status: 404,
+      message: "User not found",
+    });
+
+    return;
+  }
 
   try {
-    const user = await UsersDatabase.findById(_id);
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        status: 404,
-        message: "User not found",
-      });
-    }
-
-    const withdrawalData = {
-      method,
-      address,
-      amount: Number(amount),
-      from: from || "",
-      account: account || "",
-      status: "pending",
-      timestamp: timestamp || new Date(),
-    };
-
-    user.withdrawals.push(withdrawalData);
-
-    await user.save();
+    await user.updateOne({
+      withdrawals: [
+        ...user.withdrawals,
+        {
+          _id: uuidv4(),
+          method,
+          address,
+          amount,
+          from,
+          account,
+          status: "pending",
+          timestamp
+        },
+      ],
+    });
 
     res.status(200).json({
       success: true,
       status: 200,
       message: "Withdrawal request was successful",
-      withdrawal: withdrawalData
     });
 
     sendWithdrawalEmail({
-      amount,
-      method,
-      to,
-      address,
-      from,
+      amount: amount,
+      method: method,
+     to:to,
+      address:address,
+      from: from,
     });
 
     sendWithdrawalRequestEmail({
-      amount,
-      method,
-      address,
-      from,
+      amount: amount,
+      method: method,
+      address:address,
+      from: from,
     });
-
   } catch (error) {
     console.log(error);
-
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
   }
 });
+
 // router.put('/approve/:_id', async (req,res)=>{
 //   const { _id} = req.params;
 //   const user = await UsersDatabase();
