@@ -2,7 +2,7 @@ var express = require("express");
 const UsersDatabase = require("../../models/User");
 const { hashPassword } = require("../../utils");
 var router = express.Router();
-const { authLimiter } = require("../../rateLimiter");
+const { authLimiter } = require("../rateLimiter");
 
 router.put("/forgot-password", authLimiter, async function (req, res, next) {
   const { email } = req.body;

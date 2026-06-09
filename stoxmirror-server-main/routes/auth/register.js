@@ -4,7 +4,7 @@ var { hashPassword,sendPasswordOtp,userRegisteration, sendWelcomeEmail,resendWel
 const UsersDatabase = require("../../models/User");
 var router = express.Router();
 const { v4: uuidv4 } = require("uuid");
-const { authLimiter, otpLimiter } = require("../../rateLimiter");
+const { authLimiter, otpLimiter } = require("../rateLimiter");
 
 // Function to generate a referral code
 function generateReferralCode(length) {

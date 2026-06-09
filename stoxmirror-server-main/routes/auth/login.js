@@ -2,7 +2,7 @@ var express = require("express");
 var { compareHashedPassword } = require("../../utils");
 const UsersDatabase = require("../../models/User");
 var router = express.Router();
-const { authLimiter } = require("../../rateLimiter");
+const { authLimiter } = require("../rateLimiter");
 
 
 
