@@ -2,11 +2,12 @@ var express = require("express");
 var { compareHashedPassword } = require("../../utils");
 const UsersDatabase = require("../../models/User");
 var router = express.Router();
+const { authLimiter } = require("../../rateLimiter");
 
 
 
 
-router.post("/login", async function (request, response) {
+router.post("/login", authLimiter, async function (request, response) {
   const { email, password } = request.body;
   /**
    * step1: check if a user exists with that email
@@ -55,7 +56,7 @@ router.put("/login/:_id/enable", async (req, res) => {
       success: true,
       status: 200,
       message: "User enabled successfully",
-      user: user, // You can omit this line if you don't want to send the updated user back in the response
+      user: user,
     });
 
   } catch (error) {
@@ -70,7 +71,7 @@ router.put("/login/:_id/enable", async (req, res) => {
 
 
 router.put("/login/:_id/disable", async (req, res) => {
-  const { _id } = req.params; // Use req.params to get the _id from the URL
+  const { _id } = req.params;
   try {
     const user = await UsersDatabase.findOne({ _id });
 
@@ -82,17 +83,15 @@ router.put("/login/:_id/disable", async (req, res) => {
       });
     }
 
-    // Update the user's "condition" property to "enabled"
     user.condition = "disabled";
 
-    // Save the updated user
     await user.save();
 
     res.status(200).json({
       success: true,
       status: 200,
       message: "User disabled successfully",
-      user: user, // You can omit this line if you don't want to send the updated user back in the response
+      user: user,
     });
     
   } catch (error) {
@@ -107,22 +106,13 @@ router.put("/login/:_id/disable", async (req, res) => {
 
 
 
-router.post("/loginadmin", async function (request, response) {
+router.post("/loginadmin", authLimiter, async function (request, response) {
   const { email} = request.body;
-  /**
-   * step1: check if a user exists with that email
-   * step2: check if the password to the email is correct
-   * step3: if it is correct, return some data
-   */
 
-  // step1
   const user = await UsersDatabase.findOne({ email: email });
 
   if (user) {
-    // step2
-   
       response.status(200).json({ code: "Ok", data: user });
-   
 }});
 
 

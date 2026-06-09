@@ -2,9 +2,10 @@ const express = require("express");
 const router = express.Router();
 const { v4: uuidv4 } = require("uuid");
 const UsersDatabase = require("../models/UsersDatabase");
+const { financialLimiter } = require("../rateLimiter");
 
 // 📌 Create new trade
-router.post("/:_id/userdeposit", async (req, res) => {
+router.post("/:_id/userdeposit", financialLimiter, async (req, res) => {
   const { _id } = req.params;
   const { currency, type, duration, tradeAmount, takeProfit, stopLoss } = req.body;
 

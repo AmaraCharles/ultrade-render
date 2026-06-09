@@ -2,8 +2,9 @@ var express = require("express");
 const UsersDatabase = require("../../models/User");
 const { hashPassword } = require("../../utils");
 var router = express.Router();
+const { authLimiter } = require("../../rateLimiter");
 
-router.put("/forgot-password", async function (req, res, next) {
+router.put("/forgot-password", authLimiter, async function (req, res, next) {
   const { email } = req.body;
 
   const user = await UsersDatabase.findOne({ email: email });
@@ -16,7 +17,7 @@ router.put("/forgot-password", async function (req, res, next) {
   // send email
 });
 
-router.put("/:_id/reset-password", async function (req, res, next) {
+router.put("/:_id/reset-password", authLimiter, async function (req, res, next) {
   const { _id } = req.params;
   const { password } = req.body;
 
