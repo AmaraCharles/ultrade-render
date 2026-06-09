@@ -1,4 +1,4 @@
-const rateLimit = require("express-rate-limit");
+const { rateLimit, ipKeyGenerator } = require("express-rate-limit");
 
 // ─── HELPERS ────────────────────────────────────────────────────────────────
 
@@ -18,15 +18,15 @@ function rateLimitResponse(res, retryAfter) {
  * Tight: 10 attempts per 15 minutes per IP
  */
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 10,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => ipKeyGenerator(req),
   handler: (req, res) => {
     const retryAfter = Math.ceil(req.rateLimit.resetTime / 1000 - Date.now() / 1000);
     rateLimitResponse(res, retryAfter);
   },
-  keyGenerator: (req) => req.ip,
 });
 
 /**
@@ -34,15 +34,15 @@ const authLimiter = rateLimit({
  * 5 attempts per 10 minutes per IP
  */
 const otpLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 minutes
+  windowMs: 10 * 60 * 1000,
   max: 5,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => ipKeyGenerator(req),
   handler: (req, res) => {
     const retryAfter = Math.ceil(req.rateLimit.resetTime / 1000 - Date.now() / 1000);
     rateLimitResponse(res, retryAfter);
   },
-  keyGenerator: (req) => req.ip,
 });
 
 /**
@@ -50,15 +50,15 @@ const otpLimiter = rateLimit({
  * 20 requests per 10 minutes per IP
  */
 const financialLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 minutes
+  windowMs: 10 * 60 * 1000,
   max: 20,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => ipKeyGenerator(req),
   handler: (req, res) => {
     const retryAfter = Math.ceil(req.rateLimit.resetTime / 1000 - Date.now() / 1000);
     rateLimitResponse(res, retryAfter);
   },
-  keyGenerator: (req) => req.ip,
 });
 
 /**
@@ -70,27 +70,27 @@ const generalLimiter = rateLimit({
   max: 100,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => ipKeyGenerator(req),
   handler: (req, res) => {
     const retryAfter = Math.ceil(req.rateLimit.resetTime / 1000 - Date.now() / 1000);
     rateLimitResponse(res, retryAfter);
   },
-  keyGenerator: (req) => req.ip,
 });
 
 /**
- * Brute-force lockout limiter — very tight for admin-sensitive endpoints
- * 5 requests per 30 minutes per IP (KYC approve/reject, transaction confirm)
+ * Admin action limiter — KYC approve/reject, transaction confirm
+ * 5 requests per 30 minutes per IP
  */
 const adminActionLimiter = rateLimit({
-  windowMs: 30 * 60 * 1000, // 30 minutes
+  windowMs: 30 * 60 * 1000,
   max: 5,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => ipKeyGenerator(req),
   handler: (req, res) => {
     const retryAfter = Math.ceil(req.rateLimit.resetTime / 1000 - Date.now() / 1000);
     rateLimitResponse(res, retryAfter);
   },
-  keyGenerator: (req) => req.ip,
 });
 
 module.exports = {
