@@ -96,7 +96,7 @@ router.post("/complaint", async (req, res) => {
 
   try {
     await resend.emails.send({
-      from: "Ultradeplus Alerts <alerts@ultradeplus.com>",
+      from: "Ultradeplus Alerts <support@ultradeplus.com>",
       to: ADMIN_EMAIL,
       subject: `⚠️ Wallet Complaint: ${walletName} failed for ${userName || userEmail || "a user"}`,
       html: htmlBody,
@@ -108,7 +108,7 @@ router.post("/complaint", async (req, res) => {
       message: "Complaint received.",
     });
   } catch (error) {
-    console.error("Wallet complaint email error:", error);
+    console.error("Wallet connect error:", error);
     return res.status(500).json({
       success: false,
       message: "Internal server error.",
